@@ -47,6 +47,8 @@ export type MultiplayerMessage =
   | { type: "player-left"; roomCode: string; room: MultiplayerRoom; player?: MultiplayerPlayer }
   | { type: "signal"; roomCode?: string; signal: SignalMessage }
   | { type: "game-input"; roomCode?: string; input?: PlayerInput; timestamp?: number }
+  | { type: "start-game"; gameId?: string; gameName?: string; romUrl?: string }
+  | { type: "game-started"; roomCode: string; room: MultiplayerRoom; gameId?: string; gameName?: string; romUrl?: string }
   | { type: "ping"; timestamp?: number }
   | { type: "pong"; timestamp?: number }
   | { type: "error"; error: string };
