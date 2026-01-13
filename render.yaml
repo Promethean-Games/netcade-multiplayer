@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: n64vault-multiplayer
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ALLOWED_ORIGINS
+        value: "*"
+    healthCheckPath: /health

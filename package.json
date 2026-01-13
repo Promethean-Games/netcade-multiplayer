@@ -1,0 +1,24 @@
+{
+  "name": "n64vault-multiplayer-server",
+  "version": "1.0.0",
+  "description": "Standalone WebSocket signaling server for N64Vault multiplayer",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch index.ts"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.2"
+  }
+}
