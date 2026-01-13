@@ -51,4 +51,8 @@ export type MultiplayerMessage =
   | { type: "game-started"; roomCode: string; room: MultiplayerRoom; gameId?: string; gameName?: string; romUrl?: string }
   | { type: "ping"; timestamp?: number }
   | { type: "pong"; timestamp?: number }
-  | { type: "error"; error: string };
+  | { type: "error"; error: string }
+  // WebRTC signaling messages
+  | { type: "rtc-offer"; targetId: string; sdp: RTCSessionDescriptionInit; fromId?: string }
+  | { type: "rtc-answer"; targetId: string; sdp: RTCSessionDescriptionInit; fromId?: string }
+  | { type: "rtc-ice"; targetId: string; candidate: RTCIceCandidateInit; fromId?: string };
