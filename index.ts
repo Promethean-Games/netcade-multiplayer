@@ -315,6 +315,37 @@ function handlePing(ws: WebSocket, timestamp?: number) {
   ws.send(JSON.stringify(pongMsg));
 }
 
+// WebRTC signaling relay - forward offer/answer/ice messages between peers
+function handleRtcSignal(ws: WebSocket, message: { type: string; targetId: string; sdp?: any; candidate?: any }) {
+  const clientData = clients.get(ws);
+  if (!clientData || !clientData.roomCode) {
+    sendError(ws, "Not in a room");
+    return;
+  }
+
+  const room = rooms.get(clientData.roomCode);
+  if (!room) {
+    sendError(ws, "Room not found");
+    return;
+  }
+
+  const targetPlayer = room.players.find((p) => p.id === message.targetId);
+  if (!targetPlayer) {
+    sendError(ws, "Target player not found");
+    return;
+  }
+
+  // Forward the message to the target peer with sender's ID
+  const relayMsg = {
+    type: message.type,
+    fromId: clientData.playerId,
+    sdp: message.sdp,
+    candidate: message.candidate,
+  };
+  sendToPlayer(message.targetId, relayMsg as any);
+  log(`Relayed ${message.type} from ${clientData.playerId} to ${message.targetId}`);
+}
+
 function handleMessage(ws: WebSocket, data: string) {
   try {
     const message: MultiplayerMessage & { playerName?: string; gameId?: string; gameName?: string } = JSON.parse(data);
@@ -344,6 +375,12 @@ function handleMessage(ws: WebSocket, data: string) {
         break;
       case "ping":
         handlePing(ws, message.timestamp);
+        break;
+      // WebRTC signaling relay
+      case "rtc-offer":
+      case "rtc-answer":
+      case "rtc-ice":
+        handleRtcSignal(ws, message as any);
         break;
       default:
         log(`Unknown message type: ${(message as any).type}`);
