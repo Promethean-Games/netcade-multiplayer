@@ -272,6 +272,41 @@ function handleGameInput(ws: WebSocket, message: MultiplayerMessage & { input?: 
   sendToPlayer(room.hostId, inputMsg);
 }
 
+function handleStartGame(ws: WebSocket, gameId?: string, gameName?: string, romUrl?: string) {
+  const clientData = clients.get(ws);
+  if (!clientData || !clientData.roomCode) {
+    sendError(ws, "Not in a room");
+    return;
+  }
+
+  const room = rooms.get(clientData.roomCode);
+  if (!room) {
+    sendError(ws, "Room not found");
+    return;
+  }
+
+  if (room.hostId !== clientData.playerId) {
+    sendError(ws, "Only the host can start the game");
+    return;
+  }
+
+  room.state = "playing";
+  room.gameId = gameId;
+  room.gameName = gameName;
+
+  const gameStartedMsg: MultiplayerMessage = {
+    type: "game-started",
+    roomCode: room.code,
+    room,
+    gameId,
+    gameName,
+    romUrl,
+  };
+  
+  broadcastToRoom(room.code, gameStartedMsg);
+  log(`Game started in room ${room.code}: ${gameName || gameId || "unknown"}`);
+}
+
 function handlePing(ws: WebSocket, timestamp?: number) {
   const pongMsg: MultiplayerMessage = {
     type: "pong",
@@ -303,6 +338,9 @@ function handleMessage(ws: WebSocket, data: string) {
         break;
       case "game-input":
         handleGameInput(ws, message);
+        break;
+      case "start-game":
+        handleStartGame(ws, message.gameId, message.gameName, (message as any).romUrl);
         break;
       case "ping":
         handlePing(ws, message.timestamp);
